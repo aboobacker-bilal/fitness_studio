@@ -13,7 +13,16 @@ class ClassListView(generics.ListAPIView):
     serializer_class = FitnessClassSerializer
 
     def get_queryset(self):
-        return self.queryset.filter(date_time__gte=timezone.now())
+        upcoming = self.queryset.filter(date_time__gte=timezone.now())
+        logger.info(
+            f"{len(upcoming)} upcoming classes fetched at {timezone.now()}"
+        )
+        return upcoming
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
 
 
 class BookingCreateView(generics.CreateAPIView):
@@ -52,7 +61,9 @@ class BookingListView(generics.ListAPIView):
     def get_queryset(self):
         email = self.request.query_params.get('email')
         if email:
+            logger.info(f"Booking list requested for {email}")
             return Booking.objects.filter(client_email=email)
+        logger.warning("Booking list requested without email")
         return Booking.objects.none()
 
     def list(self, request, *args, **kwargs):

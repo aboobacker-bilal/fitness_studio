@@ -1,12 +1,22 @@
 from rest_framework import serializers
 from .models import FitnessClass, Booking
 from django.utils import timezone
+import pytz
 
 
 class FitnessClassSerializer(serializers.ModelSerializer):
     class Meta:
         model = FitnessClass
         fields = ['id', 'name', 'date_time', 'instructor', 'available_slots']
+
+    def get_local_time(self, obj):
+        request = self.context.get('request')
+        user_tz = request.query_params.get('tz') if request else 'Asia/Kolkata'
+        try:
+            tz = pytz.timezone(user_tz)
+        except pytz.UnknownTimeZoneError:
+            tz = pytz.timezone('Asia/Kolkata')
+        return obj.date_time.astimezone(tz).isoformat()
 
 
 class BookingSerializer(serializers.ModelSerializer):
