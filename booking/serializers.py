@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import FitnessClass, Booking
 from django.utils import timezone
+from django.conf import settings
 import pytz
 
 
@@ -11,7 +12,7 @@ class FitnessClassSerializer(serializers.ModelSerializer):
 
     def get_local_time(self, obj):
         request = self.context.get('request')
-        user_tz = request.query_params.get('tz') if request else 'Asia/Kolkata'
+        user_tz = request.query_params.get('tz') if request else settings.TIME_ZONE
         try:
             tz = pytz.timezone(user_tz)
         except pytz.UnknownTimeZoneError:
